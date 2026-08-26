@@ -1,4 +1,5 @@
-from typing import Any
+from dataclasses import astuple
+from typing import Any, Iterable
 
 from src.api_ingestion_research.models.product import Product
 from src.api_ingestion_research.models.review import Review
@@ -45,3 +46,11 @@ def transform_product(product: dict[str, Any]) -> tuple[Product, list[Review]]:
         product_reviews.append(rev)
 
     return flat_product, product_reviews
+
+
+def convert_iterable_of_dataclasses_into_list_of_tuples(iterable: Iterable) -> list[tuple]:
+    list_of_tuples = []
+    for i in iterable:
+        ituple = astuple(i)
+        list_of_tuples.append(ituple)
+    return list_of_tuples
