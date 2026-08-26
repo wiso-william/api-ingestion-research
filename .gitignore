@@ -1,0 +1,5 @@
+.venv/
+.env
+clickhouse-data/
+__pycache__/
+*.pyc
