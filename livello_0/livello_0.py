@@ -1,5 +1,9 @@
-import clickhouse_connect
+from clickhouse_connect import get_client
+import os 
+from dotenv import load_dotenv
 import requests
+
+load_dotenv()
 
 BASE_URL = "https://api.github.com/repos/duckdb/duckdb/issues?state=all&per_page=100"
 
@@ -11,11 +15,11 @@ for issue in response:
     row = (issue["id"], issue["url"], issue["repository_url"])
     rows.append(row) 
 
-client = clickhouse_connect.get_client(
-    host="localhost",
-    port=8123,
-    username="default",
-    password=""
+client = get_client(
+    host=os.getenv("CLICKHOUSE_HOST"),
+    port=os.getenv("CLICKHOUSE_PORT"),
+    username=os.getenv("CLICKHOUSE_USER"),
+    password=os.getenv("CLICKHOUSE_PASSWORD")
 )
 
 client.command("""
