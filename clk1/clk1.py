@@ -11,7 +11,7 @@ client = get_client(
     password=os.getenv("CLICKHOUSE_PASSWORD")
 )
 
-query = """
+query_create_product_table = """
     CREATE TABLE IF NOT EXISTS products
     (
     id UInt32,
@@ -44,6 +44,24 @@ query = """
     ENGINE = MergeTree
     ORDER BY id
 """
-client.command(query)
+client.command(query_create_product_table)
 
 print(client.query("SHOW CREATE TABLE default.products").result_rows)
+
+query_create_reviews_table = """
+CREATE TABLE IF NOT EXISTS reviews
+(
+    product_id UInt32,
+    rating UInt8,
+    comment Nullable(String),
+    date String,
+    reviewerName String,
+    reviewerEmail Nullable(String)
+)
+ENGINE = MergeTree
+ORDER BY product_id
+"""
+
+client.command(query_create_reviews_table)
+
+print(client.query("SHOW CREATE TABLE default.reviews").result_rows)
