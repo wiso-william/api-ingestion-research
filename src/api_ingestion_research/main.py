@@ -54,3 +54,16 @@ create_reviews_table_query = create_reviews_table_path.read_text()
 truncate_products_query = truncate_products_path.read_text()
 truncate_reviews_query = truncate_reviews_path.read_text()
 
+# Running SQL commands
+try:
+    client.command(create_products_table_query)
+    client.command(create_reviews_table_query)
+    client.command(truncate_products_query)
+    client.command(truncate_reviews_query)
+    logger.info("Tables are ready to accept data")
+except:
+    logger.exception("An error has occured while creating fresh tables")
+
+client.insert(table="products", data=product_tuples)
+client.insert(table="reviews", data=reviews_tuples)
+logger.info("process completed")
