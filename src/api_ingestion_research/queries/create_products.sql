@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS products
+    (
+    id UInt32,
+    title String,
+    description String,
+    category Nullable(String),
+    price Float64,
+    discountPercentage Float32,
+    rating Float32,
+    stock UInt16,
+    tags Array(String),
+    sku String,
+    weight UInt16,
+    product_width Float32,
+    product_height Float32,
+    product_depth Float32,
+    warrantyInformation Nullable(String),
+    shippingInformation Nullable(String),
+    availabilityStatus Nullable(String),
+    returnPolicy Nullable(String),
+    minimumOrderQuantity Nullable(UInt8),
+    created_at DateTime64(3),
+    updated_at Nullable(DateTime64(3)),
+    barcode String,
+    qr_code Nullable(String),
+    images Array(String),
+    thumbnail Nullable(String),
+    brand Nullable(String),
+    )
+    ENGINE = MergeTree
+    ORDER BY id
