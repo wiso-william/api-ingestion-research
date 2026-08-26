@@ -25,7 +25,6 @@ query_create_product_table = """
     tags Array(String),
     sku String,
     weight UInt16,
-    brand Nullable(String),
     product_width Float32,
     product_height Float32,
     product_depth Float32,
@@ -39,14 +38,16 @@ query_create_product_table = """
     barcode String,
     qr_code Nullable(String),
     images Array(String),
-    thumbnail Nullable(String)
+    thumbnail Nullable(String),
+    brand Nullable(String),
     )
     ENGINE = MergeTree
     ORDER BY id
 """
+client.command("DROP TABLE default.products")
 client.command(query_create_product_table)
 
-print(client.query("SHOW CREATE TABLE default.products").result_rows)
+#print(client.query("SHOW CREATE TABLE default.products").result_rows)
 
 query_create_reviews_table = """
 CREATE TABLE IF NOT EXISTS reviews
@@ -64,4 +65,13 @@ ORDER BY product_id
 
 client.command(query_create_reviews_table)
 
-print(client.query("SHOW CREATE TABLE default.reviews").result_rows)
+#print(client.query("SHOW CREATE TABLE default.reviews").result_rows)
+
+query_truncate_products = "TRUNCATE TABLE products"
+query_truncate_reviews = "TRUNCATE TABLE reviews"
+
+client.command(query_truncate_products)
+client.command(query_truncate_reviews)
+
+product_example = (1, 'Essence Mascara Lash Princess', 'The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.', 'beauty', 9.99, 10.48, 2.56, 99, ['beauty', 'mascara'], 'BEA-ESS-ESS-001', 4, 15.14, 13.08, 22.99, '1 week warranty', 'Ships in 3-5 business days', 'In Stock', 'No return policy', 48, '2025-04-30T09:41:02.053Z', '2025-04-30T09:41:02.053Z', '5784719087687', 'https://cdn.dummyjson.com/public/qr-code.png', ['https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp'], 'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp', 'Essence')
+review_example = (1, 3, 'Would not recommend!', '2025-04-30T09:41:02.053Z', 'Eleanor Collins', 'eleanor.collins@x.dummyjson.com')

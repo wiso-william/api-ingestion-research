@@ -1,7 +1,7 @@
 """Applico le funzioni precedenti a tutti i record, non solo 1"""
 
 import requests
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from typing import Any
 
 
@@ -115,3 +115,7 @@ while True:
 
 print("Il numero di prodotti è %s", len(products))
 print("Il numero di review è %s", len(reviews))
+
+print(astuple(products[0]))
+print("-----------------")
+print(astuple(reviews[0]))
