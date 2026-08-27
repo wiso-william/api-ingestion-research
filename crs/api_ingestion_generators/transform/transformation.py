@@ -56,13 +56,10 @@ def burba(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50):
 
     while True:
 
+        products_received = 0
+
         for product in extract_products(limit=limit, skip_amount=skip_amount):
-            # Questo è inutile perchè quando finisce lo stream il for termina da solo
-            # if not product:
-            #     yield product_batch, reviews_batch
-            #     product_batch = []
-            #     reviews_batch = []
-            #     break
+            products_received += 1
 
             for flat_product, product_reviews in transform_product(product=product):
                 product_batch.append(flat_product)
@@ -71,6 +68,12 @@ def burba(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50):
         if len(product_batch) >= batch_amount:
             yield product_batch, reviews_batch
             product_batch = list()
-            reviews_batch = list()  
+            reviews_batch = list() 
+
+        if products_received < limit:
+            yield product_batch, reviews_batch
+            product_batch = list()
+            reviews_batch = list() 
+            break
 
         skip_amount += limit
