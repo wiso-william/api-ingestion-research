@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import astuple
 from typing import Any, Iterable
 
@@ -50,7 +51,23 @@ def transform_product(product: dict[str, Any]):
     yield astuple(flat_product), product_reviews
 
 
-def burba(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50):
+def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Iterator[tuple[list[tuple[Any, ...]], list[tuple[Any, ...]]]]:
+    """Creates batches of tuples ready to be loaded
+    
+    This function reads data from the api and fills up
+    both products and reviews batches since they are coupled
+    Once the batch is full it yields the result,
+    if there is no more data coming form the api it yields the batches
+    
+    Args:
+        limit: the maximum amount of records per api page
+        skip_amount: how many records it should skip
+        batch_amount: size of batch
+
+    Yields:
+        tuple: containing product_batch and reviews_batch
+
+    """
     product_batch = []
     reviews_batch = []
 
