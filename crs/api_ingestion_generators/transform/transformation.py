@@ -88,9 +88,8 @@ def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Ite
             reviews_batch = list() 
 
         if products_received < limit:
-            yield product_batch, reviews_batch
-            product_batch = list()
-            reviews_batch = list() 
+            if product_batch:
+                yield product_batch, reviews_batch
             break
 
         skip_amount += limit
