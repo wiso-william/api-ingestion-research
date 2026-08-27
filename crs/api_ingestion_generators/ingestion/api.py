@@ -34,5 +34,4 @@ def extract_products(limit: int, skip_amount: int):
 
     response.raise_for_status()
 
-    return response.json()["products"]
-
+    return response.json()["products"] 
