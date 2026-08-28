@@ -34,7 +34,4 @@ def extract_products(limit: int, skip_amount: int):
 
     response.raise_for_status()
 
-    return response.json()["products"]
-
-# import sys 
-# print(sys.getsizeof(extract_products(10,0)))
+    return response.json()["products"] 

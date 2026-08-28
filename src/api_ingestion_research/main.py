@@ -1,45 +1,16 @@
-import logging
+from logging import getLogger
 from pathlib import Path
 
+from src.api_ingestion_research.transformation.transform import batcher
+from src.api_ingestion_research.loading.clickhouse import create_client, load_batches
 from src.api_ingestion_research.settings.config import settings
 from src.api_ingestion_research.settings.setup_logging import setup_logging
-from src.api_ingestion_research.ingestion.api import extract_products
-from src.api_ingestion_research.transformation.transform import transform_product, convert_iterable_of_dataclasses_into_list_of_tuples
-from src.api_ingestion_research.loading.clickhouse import create_client
-
-
-setup_logging()
-logger = logging.getLogger(__name__)
 
 QUERY_DIR = Path(__file__).resolve().parent / "queries"
 
-# util to skip API pages
-skip_amount = 0
+setup_logging()
+logger = getLogger(__name__)
 
-# products and reviews storage
-products_list = []
-reviews_list = []
-
-# Saving in RAM all products and reviews
-while True:
-    products = extract_products(limit=settings.limit, skip_amount=skip_amount)
-    if not products:
-        break
-    for product in products:
-        flat_product, extracted_reviews = transform_product(product=product)
-        products_list.append(flat_product)
-        reviews_list.extend(extracted_reviews)
-    skip_amount += settings.limit
-
-# logging info
-logger.info("Il numero di prodotti è %s", len(products_list))
-logger.info("Il numero di review è %s", len(reviews_list))
-
-# Normalizing for clickhouse consumption
-product_tuples = convert_iterable_of_dataclasses_into_list_of_tuples(products_list)
-reviews_tuples = convert_iterable_of_dataclasses_into_list_of_tuples(reviews_list)
-
-# Creating clickhouse client 
 client = create_client(settings=settings)
 
 # SQL Paths
@@ -64,6 +35,9 @@ try:
 except:
     logger.exception("An error has occured while creating fresh tables")
 
-client.insert(table="products", data=product_tuples)
-client.insert(table="reviews", data=reviews_tuples)
-logger.info("process completed")
+# Loading batches
+counter = 0
+for batch in batcher(limit=10,batch_amount=50):
+    counter += 1
+    logger.info("Loaded batch number: %s", counter)
+    load_batches(client=client, batches=batch)
