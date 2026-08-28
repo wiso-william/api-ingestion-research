@@ -13,7 +13,6 @@ class Product:
     tags: list[str]
     sku: str
     weight: int
-    # flat
     product_width: float 
     product_height: float 
     product_depth: float 
@@ -22,12 +21,10 @@ class Product:
     availabilityStatus: str
     returnPolicy: str
     minimumOrderQuantity: int
-    # meta: dict
     created_at: str
     updated_at: str
     barcode: str
     qr_code: str
     images: list
     thumbnail: str
-    # Default
     brand: str | None = None
