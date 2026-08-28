@@ -6,26 +6,36 @@ from src.api_ingestion_research.models.product import Product
 from src.api_ingestion_research.models.review import Review
 from src.api_ingestion_research.ingestion.api import extract_products
 
-def transform_product(product: dict[str, Any]):
-    # Cosa voglio appiattire ?
+def transform_product(product: dict[str, Any]) -> Iterator[
+    tuple[
+        tuple[Any, ...],
+        list[tuple[Any, ...]]
+    ]
+]:
+    """Transforms a raw product into flattened product and review records.
+
+    Args:
+        product: Raw product data returned by the API.
+
+    Yields:
+        A tuple containing the flattened product record and a list of
+        associated review records.
+    """
     dimensions: dict[str, float] = product["dimensions"]
     metadata: dict[str, Any] = product["meta"]
 
     reviews: list[dict[str, Any]] = product["reviews"]
 
-    # dict comprehension
     flat_product = Product(
-        **{ # Spacchetto il nuovo dict per avere named argument
-            k: v # Valori del nuovo dict
-            for k,v in product.items() # items crea pair (id, 2) (nome: Mario)
-            if k not in {"dimensions", "meta", "reviews", "brand"} # Condizione + set(migliore per membership)
+        **{ 
+            k: v 
+            for k,v in product.items() 
+            if k not in {"dimensions", "meta", "reviews", "brand"} 
         },
-        # Aggiungo le dimensioni che che mancano
-        brand=product.get("brand"), # Non specifico il default quindi se brand non esiste è None
+        brand=product.get("brand"), 
         product_width=dimensions["width"],
         product_height=dimensions["height"],
         product_depth=dimensions["depth"],
-        # Aggiungo Metadata
         created_at=metadata["createdAt"],
         updated_at=metadata["updatedAt"],
         barcode=metadata["barcode"],
@@ -51,7 +61,12 @@ def transform_product(product: dict[str, Any]):
     yield astuple(flat_product), product_reviews
 
 
-def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Iterator[tuple[list[tuple[Any, ...]], list[tuple[Any, ...]]]]:
+def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Iterator[
+    tuple[
+        list[tuple[Any, ...]], 
+        list[tuple[Any, ...]]
+    ]
+]:
     """Creates batches of tuples ready to be loaded
     
     This function reads data from the api and fills up
