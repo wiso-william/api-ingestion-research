@@ -4,14 +4,15 @@ from pathlib import Path
 CHECKPOINT_FILE = Path("data/checkpoint.json")
 
 
-def load_checkpoint() -> int:
+def load_checkpoint() -> int | None:
     """Loads the last successfully processed offset from the checkpoint.
 
     Returns:
-        The number of records already processed.
+        The last successfully processed offset, or None if no checkpoint
+        exists.
     """
     if not CHECKPOINT_FILE.exists():
-        return 0
+        return None
 
     with CHECKPOINT_FILE.open("r") as file:
         checkpoint = json.load(file)
