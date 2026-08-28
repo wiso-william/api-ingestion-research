@@ -61,33 +61,34 @@ def transform_product(product: dict[str, Any]) -> Iterator[
     yield astuple(flat_product), product_reviews
 
 
-def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Iterator[
+def batcher(limit: int = 10, skip_amount: int = 0, batch_amount: int = 50) -> Iterator[
     tuple[
-        list[tuple[Any, ...]], 
-        list[tuple[Any, ...]]
+        list[tuple[Any, ...]],
+        list[tuple[Any, ...]],
+        int,
     ]
 ]:
-    """Creates batches of tuples ready to be loaded
-    
-    This function reads data from the api and fills up
-    both products and reviews batches since they are coupled
-    Once the batch is full it yields the result,
-    if there is no more data coming form the api it yields the batches
-    
+    """Creates batches of tuples ready to be loaded.
+
+    This function reads data from the API and fills both product and review
+    batches since they are coupled. Once the batch reaches the configured
+    size, it yields the batches together with the offset to use for the next
+    API request.
+
     Args:
-        limit: the maximum amount of records per api page
-        skip_amount: how many records it should skip
-        batch_amount: size of batch
+        limit: Maximum number of records per API page.
+        skip_amount: Number of records to skip before retrieving the first
+            API page.
+        batch_amount: Maximum number of products in each batch.
 
     Yields:
-        tuple: containing product_batch and reviews_batch
-
+        A tuple containing the product batch, the review batch, and the
+        offset to use for the next API request.
     """
     product_batch = []
     reviews_batch = []
 
     while True:
-
         products_received = 0
 
         for product in extract_products(limit=limit, skip_amount=skip_amount):
@@ -97,14 +98,16 @@ def batcher(limit: int = 10, skip_amount:int = 0, batch_amount: int = 50) -> Ite
                 product_batch.append(flat_product)
                 reviews_batch.extend(product_reviews)
 
+        skip_amount += products_received
+
         if len(product_batch) >= batch_amount:
-            yield product_batch, reviews_batch
+            yield product_batch, reviews_batch, skip_amount
+
             product_batch = list()
             reviews_batch = list() 
 
         if products_received < limit:
             if product_batch:
-                yield product_batch, reviews_batch
-            break
+                yield product_batch, reviews_batch, skip_amount
 
-        skip_amount += limit
+            break

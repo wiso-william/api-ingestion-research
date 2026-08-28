@@ -5,6 +5,7 @@ from src.api_ingestion_research.transformation.transform import batcher
 from src.api_ingestion_research.loading.clickhouse import create_client, load_batches
 from src.api_ingestion_research.settings.config import settings
 from src.api_ingestion_research.settings.setup_logging import setup_logging
+from src.api_ingestion_research.utils.checkpoint import load_checkpoint, save_checkpoint
 
 QUERY_DIR = Path(__file__).resolve().parent / "queries"
 
@@ -29,15 +30,30 @@ truncate_reviews_query = truncate_reviews_path.read_text()
 try:
     client.command(create_products_table_query)
     client.command(create_reviews_table_query)
-    client.command(truncate_products_query)
-    client.command(truncate_reviews_query)
-    logger.info("Tables are ready to accept data")
-except:
-    logger.exception("An error has occured while creating fresh tables")
+
+    skip_amount = load_checkpoint()
+
+    if skip_amount is None:
+        client.command(truncate_products_query)
+        client.command(truncate_reviews_query)
+        skip_amount = 0
+        
+except Exception:
+    logger.exception("An error occurred while preparing the tables")
+    raise
 
 # Loading batches
 counter = 0
-for batch in batcher(limit=10,batch_amount=50):
-    counter += 1
-    logger.info("Loaded batch number: %s", counter)
-    load_batches(client=client, batches=batch)
+for product_batch, reviews_batch, next_skip in batcher(
+    limit=10,
+    batch_amount=50,
+    skip_amount=skip_amount,
+):
+    load_batches(
+        client=client,
+        batches=(product_batch, reviews_batch),
+    )
+
+    save_checkpoint(next_skip)
+
+    logger.info("Loaded batch up to skip=%s", next_skip)
