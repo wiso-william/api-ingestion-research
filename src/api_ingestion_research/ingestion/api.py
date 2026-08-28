@@ -26,6 +26,18 @@ URL = "https://dummyjson.com/products"
     reraise=True,
 )
 def extract_products(limit: int, skip_amount: int):
+    """Extracts a page of products from the API.
+
+    Args:
+        limit: Maximum number of products to retrieve.
+        skip_amount: Number of products to skip before retrieving the page.
+
+    Returns:
+        A list of products returned by the API.
+
+    Raises:
+        requests.HTTPError: If the API returns an unsuccessful HTTP status.
+    """
     response = requests.get(
         URL,
         params={"limit": limit,
